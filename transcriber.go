@@ -1,4 +1,4 @@
-package listener
+package audioactor
 
 import (
 	"bytes"
@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"strings"
 )
 
 type Transcriber interface {
@@ -91,8 +92,12 @@ func extractTranscript(output []byte) (string, error) {
 	matches := r.FindSubmatch(output)
 
 	if len(matches) < 2 {
-		return "", fmt.Errorf("unable to find transcript in output")
+		return "", fmt.Errorf("unable to find transcript")
+	}
+	transcript := string(matches[1])
+	if strings.HasPrefix(transcript, "(") || strings.HasPrefix(transcript, "[") {
+		return "", fmt.Errorf("no speech has been found")
 	}
 
-	return string(matches[1]), nil
+	return transcript, nil
 }
